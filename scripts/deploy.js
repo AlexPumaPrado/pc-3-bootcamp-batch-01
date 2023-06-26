@@ -27,9 +27,33 @@ async function deployMumbai() {
 
 async function deployGoerli() {
   // gnosis safe
+  var gnosis={address:"0x1a42979EDB230080cA294C312e682c0e62399384"};
   // Crear un gnosis safe en https://gnosis-safe.io/app/
   // Extraer el address del gnosis safe y pasarlo al contrato con un setter
-  var gnosis = { address: "" };
+  var myTokenContract = await deploySCNoUp("MyTokenMiPrimerToken");
+  await ex(
+    myTokenContract,
+    "setGnosisAddress",
+    [gnosis.address],
+    "Setting Gnosis address failed"
+  );
+  console.log("MyTokenMiPrimerToken deployed on Goerli");
+
+
+  var MiPrimerToken = await hre.ethers.getContractFactory("MiPrimerToken");
+  var miPrimerToken = await MiPrimerToken.deploy();
+  var tx = await miPrimerToken.deployed();
+  console.log("Contract MyPrimerToken address:", miPrimerToken.address);
+  
+    await tx.deployTransaction.wait(5);
+  
+  console.log(`Deploy at ${miPrimerToken.address}`);
+  
+  await hre.run("verify:verify", {
+    address: miPrimerToken.address,
+    constructorArguments: [],
+    contract: "contracts/MiPrimerToken.sol:MiPrimerToken",
+  });
 }
 
 // deployMumbai()
